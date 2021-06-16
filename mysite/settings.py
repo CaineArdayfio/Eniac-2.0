@@ -25,7 +25,7 @@ SECRET_KEY = 'mek+o#-p8dw*q)j$f24s3=7poi5^4r$!7j(8)1f809&h18t9$j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['eniac-2.azurewebsites.net']
 
 
 # Application definition
