@@ -1,0 +1,247 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Users {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+	<!-- data tables css -->
+	<link rel="stylesheet" href="/static/assets/css/plugins/dataTables.bootstrap4.min.css">
+	<!-- Select2 css -->
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<style media="screen">
+		.select2-search__field{
+			color: white;
+		}
+	</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+	<!-- [ Main Content ] start -->
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+			<!-- [ breadcrumb ] start -->
+			<div class="page-header">
+				<div class="page-block">
+					<div class="row align-items-center">
+						<div class="col-md-12">
+							<div class="page-header-title">
+								<h5>User List</h5>
+							</div>
+							<ul class="breadcrumb">
+								<li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="feather icon-home"></i></a></li>
+								<li class="breadcrumb-item"><a href="#!">User list</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- [ breadcrumb ] end -->
+			<!-- [ Main Content ] start -->
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card user-profile-list">
+						<div class="card-header">
+							<button type="button" class="btn  btn-primary" id="user-create-button">Create User</button>
+						</div>
+						<div class="card-body">
+							<div class="dt-responsive table-responsive">
+								<table id="user-list-table" class="table nowrap">
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Phone Number</th>
+											<th>Group</th>
+										</tr>
+									</thead>
+									<tfoot>
+										<tr>
+											<th>Name</th>
+											<th>Phone Number</th>
+											<th>Group</th>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- [ Main Content ] end -->
+
+			<!-- [ CREATE USER MODAL] start -->
+			<div id="CreateUserModal" class="modal fade" tabindex="-1" style="display: none;">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">New User</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+						</div>
+						<div class="modal-body">
+							<form id="myform">
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label class="form-label">Name</label>
+											<input type="text" class="form-control" name="name" placeholder="Name">
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<label class="form-label">Phone Number</label>
+											<input type="text" class="form-control" data-mask="(000) 000-0000" name="phone-number" placeholder="(999) 999-9999">
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<label class="form-label">User Group</label>
+											<select style="width: 100%" id="group-select" name="group-select"></select>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn  btn-secondary" data-dismiss="modal">Close</button>
+							<button id="user-edit-create-button" type="button" class="btn btn-primary"></button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- [ CREATE USER MODAL] end -->
+		</div>
+	</div>
+	<!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+	<!-- cookie js (necessary for CSRF token in ajax post requests) -->
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+	<script src="/static/assets/js/survey-data/utilities.js"></script>
+	<!-- input mask js -->
+	<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/plugins/jquery.mask.min.js"></script>
+	<!-- datatable js -->
+	<script src="/static/assets/js/plugins/jquery.dataTables.min.js"></script>
+	<script src="/static/assets/js/plugins/dataTables.bootstrap4.min.js"></script>
+	<!-- Select2 js -->
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+	<script>
+		$(document).ready(function() {
+			URL_SCHEDULE = "https://eniacprofessional.azurewebsites.net/api/orchestrators/filler"
+			// [ Create User Table ] start
+			var user_table = $('#user-list-table').DataTable( {
+					"ajax": "{% url 'all_users' %}",
+					columns: [
+            {
+                data: 'name',
+								render: function(data, type){
+									if (type === 'display'){
+										return '<div class="d-inline-block align-middle"><img src="https://robohash.org/' + data + '.png?bgset=bg1" alt="user image" class="img-radius align-top m-r-15" style="width:40px;"><div class="d-inline-block"><h6 class="m-b-0">' + data + '</h6></div></div>'
+									}
+									return data;
+								}
+            },
+            {
+                data: 'phone_number'
+            },
+						{
+                data: 'group',
+								render: function(data, type){
+										if (type === 'display') {
+											var group_badges = ""
+											for (var i=0; i < data.length; i++){
+												group_badges += '<span class="badge badge-light-success mr-1">' + data[i] + '</span>'
+											}
+												return group_badges + "<div class='overlay-edit'><button type='button' class='btn btn-icon btn-success user-edit-button'><i class='feather icon-check-circle'></i></button><button type='button' class='btn btn-icon btn-danger user-delete-button'><i class='feather icon-trash-2'></i></button></div>";
+										}
+                    return data;
+                }
+            }],
+					createdRow: function (row, data, dataIndex) {
+            $(row).attr('data-username', data['name']); // data = {name: "Caine", phone_number: "3176930478", group: "Employee Group #1"}
+        	}
+			});
+			// [ Create User Table ] end
+
+			// [ Select Group Dropdown ] start
+			$('#group-select').select2({
+				dropdownParent: $('#CreateUserModal'),
+				multiple: true,
+			  ajax: {
+			    url: "{% url 'all_groups' %}",
+			    dataType: 'json'
+			  },
+				tags: true, // allows user to add select option if it does not exist
+			});
+			// [ Select Group Dropdown ] end
+
+			// [ CREATE/EDIT USER ] start
+			$('#user-edit-create-button').click(function(){
+				name = $("form#myform input[name='name']").val()
+				phone_number = $("form#myform input[name='phone-number']").val()
+				selection_data = $('#group-select').select2('data'); // Array [2]: 0 {text: "Group1", id: "2", …} 1 {text: "afd", id: "5", …}
+				groups = selection_data.map(a => a.text);
+
+				if ($(this).attr('data-type') == "create-user"){
+					ajaxPostRequest("{% url 'new_user' %}", { name: name, phone_number: phone_number, groups: JSON.stringify(groups)}, function(json){
+						user_table.ajax.reload();
+					});
+				}else if($(this).attr('data-type') == "edit-user"){
+					ajaxPostRequest("{% url 'edit_user' %}", { original_name: $(this).attr('data-edit-username'), name: name, phone_number: phone_number, groups: JSON.stringify(groups)}, function(json){
+						user_table.ajax.reload();
+					})
+				}
+				ajaxPostRequest(URL_SCHEDULE, {}, null)
+				$("#CreateUserModal").modal('hide');
+			})
+			// [ CREATE/EDIT USER ] end
+
+			// [ DELETE USER] start
+			$(document).on('click', '.user-delete-button', function(){
+				var parent_div = $(this).closest('tr')
+				var username = parent_div.attr("data-username");
+
+				ajaxPostRequest("{% url 'delete_user' %}", { name: username }, function(json) {
+					user_table.ajax.reload();
+					ajaxPostRequest(URL_SCHEDULE, {}, null)
+				})
+			});
+			// [ DELETE USER ] end
+
+			// [ SHOW MODAL TO CREATE ] start
+			$('#user-create-button').click(function(){
+				$('#user-edit-create-button').attr('data-type', "create-user")
+				$('#user-edit-create-button').text("Create User")
+
+				$("form#myform input[name='name']").val("")
+				$("form#myform input[name='phone-number']").val("")
+
+				$("#CreateUserModal").modal('show');
+			})
+			// [ SHOW MODAL TO CREATE ] end
+
+
+			// [ SHOW MODAL TO EDIT ] start
+			$(document).on('click', '.user-edit-button', function(){
+				var parent_div = $(this).closest('tr')
+				var username = parent_div.attr("data-username");
+				$('#user-edit-create-button').attr('data-type', "edit-user")
+				$('#user-edit-create-button').attr('data-edit-username', username)
+				$('#user-edit-create-button').text("Save Changes")
+				ajaxPostRequest("{% url 'user_details' %}", {username: username}, function(json){
+					$("form#myform input[name='name']").val(json['name'])
+					$("form#myform input[name='phone-number']").val(json['phone_number'])
+					// if the client chooses to edit a user, the groups selct will not be pre-populated—they'll have to reselect the options
+				})
+				$("#CreateUserModal").modal('show');
+
+			})
+			// [ SHOW MODAL TO EDIT ] end
+		})
+	</script>
+
+{% endblock javascripts %}

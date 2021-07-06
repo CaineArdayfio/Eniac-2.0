@@ -1,0 +1,112 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Results {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+    <!-- Rating css -->
+    <link rel="stylesheet" href="/static/assets/css/plugins/bars-1to10.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="pcoded-main-container">
+        <div class="pcoded-content">
+            <!-- [ breadcrumb ] start -->
+      			<div class="page-header">
+      				<div class="page-block">
+      					<div class="row align-items-center">
+      						<div class="col-md-12">
+      							<div class="page-header-title">
+      								<h5>Results for <a href="{% url 'surveys' %}">{{survey.question_name }}</a></h5>
+      							</div>
+      							<ul class="breadcrumb">
+      								<li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="feather icon-home"></i></a></li>
+      								<li class="breadcrumb-item"><a href="#!">Results</a></li>
+                      <li class="breadcrumb-item"><a href="#!">{{ survey.question_name }}</a></li>
+      							</ul>
+      						</div>
+      					</div>
+      				</div>
+      			</div>
+      			<!-- [ breadcrumb ] end -->
+            <!-- [ Main Content ] start -->
+            <div class="row">
+                  <div class="col-md-6 col-xl-6">
+        						<div class="card">
+        								<div class="card-header">
+        										<h5>User Sentiment Data</h5>
+        								</div>
+        								<div class="card-body pl-0 pb-0">
+
+        									<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+        									<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+        									<script src="https://cdn.amcharts.com/lib/4/themes/dark.js"></script>
+        									<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+        									<div id="dashboardchart" style="height: 500px"></div>
+        								</div>
+        						</div>
+
+
+
+
+        				</div>
+
+                <div class="col-md-6 col-xl-6">
+
+                  <div class="card">
+                      <div class="card-header">
+                          <h5>Responses</h5>
+                      </div>
+                      <div class="card-body">
+                          <ul class="feed-blog pl-0" id="response-table">
+                          </ul>
+                      </div>
+                  </div>
+                </div>
+            </div>
+            <!-- [ Main Content ] end -->
+        </div>
+    </div>
+    <!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <!-- Rating Js -->
+    <script src="/static/assets/js/plugins/jquery.barrating.min.js"></script>
+    <!-- Apex Chart -->
+    <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
+    <!-- peity chart js -->
+    <script src="/static/assets/js/plugins/jquery.peity.min.js"></script>
+    <!-- custom-chart js -->
+    <script src="/static/assets/js/pages/chart.js"></script>
+    <script>
+    var MyGlobal = {
+      q_id: {{ survey.id }},
+      survey_details: {% url 'survey_details' %},
+      all_questions: {% url 'all_questions' %},
+    };
+    </script>
+  	<script src="/static/assets/js/survey-data/main.js"></script>
+    <!-- cookie js (necessary for CSRF token in ajax post requests) -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <!-- utilities js (tools I created) -->
+    <script src="/static/assets/js/survey-data/utilities.js"></script>
+    <script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/plugins/bootstrap-notify.min.js"></script>
+
+  	<script type="text/javascript">
+  		// basically saying to not start the graphing until you've retreived all the data from the database
+  		ajaxPostRequest('{% url "get_data" %}', {survey: {{ survey.id }}}, function(json){
+  			plot_data(json)
+  		})
+      $(document).ready(function(){
+        notify("", "Click a datapoint to see user responses", "top", "right", "feather icon-layers", "primary", "animated fadeInRight", "animated fadeOutRight", delay=0, allow_dismiss=false);
+      })
+  	</script>
+
+{% endblock javascripts %}
