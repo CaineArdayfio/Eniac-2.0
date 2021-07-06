@@ -1,3 +1,4 @@
+
 function plot_response_data(json){
   ajaxPostRequest(MyGlobal.all_questions, {}, function(q_data){
     chart1(json, q_data)
@@ -36,6 +37,7 @@ function chart1(json, q_data){
       categories.push(q_data[ids[q_id]]['name'])
     }
 
+
     series1 = []
     series2 = []
     series3 = []
@@ -62,8 +64,8 @@ function chart1(json, q_data){
       series4.push(sum4)
       series5.push(sum5)
     }
-
-    series = [{name: "😃", data: series5}, {name: "🙂", data: series4}, {name: "😐", data: series3},{name: "🙁", data: series2}, {name: "😭", data: series1}]
+    console.log(series5)
+    series = [{name: "😭", data: series1}, {name: "🙁", data: series2}, {name: "😐", data: series3}, {name: "🙂", data: series4}, {name: "😃", data: series5}]
 
     $(function() {
         var options = {
@@ -112,6 +114,7 @@ function chart1(json, q_data){
                 position: 'right',
                 offsetY: 40,
                 fontSize: '14px',
+                inverseOrder: true,
             },
             fill: {
                 type: 'gradient',
@@ -205,7 +208,7 @@ function chart2(json){
               labels: {
                   style: {
                       color: '#fff',
-                  },
+                  }
               },
           },
           grid: {
@@ -264,7 +267,7 @@ function chart3(json){
         if (count >= 1){// if there is at least one response for this day
           data.push({x: basetime, y: sum_feeling/count})
         }else{
-          data.push({x: basetime, y: 0})
+          data.push({x: basetime, y: 1}) // default value if there is no data
         }
         basetime += 86400000
         i++;
@@ -294,7 +297,7 @@ function chart3(json){
             if (count >= 1){// if there is at least one response for this day
               data.push({x: newDate, y: sum_feeling/count})
             }else{
-              data.push({x: newDate, y: 0})
+              data.push({x: newDate, y: 1}) // default value if there is no data
             }
           }
       }
@@ -348,7 +351,30 @@ function chart3(json){
               range: 777600000,
           },
           yaxis: {
-              max: 5.5
+              max: 5,
+              min: 1,
+              tickAmount: 4,
+              labels: {
+                style: {
+                  fontSize: '2em'
+                },
+                formatter: function(val, index) {
+                  val = val.toFixed(1)
+                  if(val == 1){
+                    return "😭"
+                  }else if(val == 2){
+                    return "🙁"
+                  }else if(val == 3){
+                    return "😐"
+                  }else if(val == 4){
+                    return "🙂"
+                  }else if(val == 5){
+                    return "😃"
+                  }else{
+                    return val
+                  }
+                }
+              }
           },
           legend: {
               show: false
