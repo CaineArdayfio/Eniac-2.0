@@ -7,6 +7,7 @@ emoji_key = {
 }
 
 function plot_data(text){
+  console.log(text)
   am4core.options.queue = true;
   color1 = am4core.color("#3358f4");
   color2 = am4core.color("#1d8cf8");

@@ -107,11 +107,11 @@
                 <li>
                     <div class="dropdown drp-user">
                         <a href="#!" class="dropdown-toggle" data-toggle="dropdown">
-                            <img src="/static/assets/images/user/blank-profile.png" class="img-radius wid-40" alt="User-Profile-Image">
+                            <img src="https://robohash.org/{{ request.user.username }}.png?bgset=bg1" class="img-radius wid-40" alt="User-Profile-Image">
                         </a>
                         <div class="dropdown-menu dropdown-menu-right profile-notification">
                             <div class="pro-head">
-                                <img src="/static/assets/images/user/blank-profile.png" class="img-radius" alt="User-Profile-Image">
+                                <img src="https://robohash.org/{{ request.user.username }}.png?bgset=bg1" class="img-radius" alt="User-Profile-Image">
                                 <span>
                                     {{ request.user.username }}
                                 </span>

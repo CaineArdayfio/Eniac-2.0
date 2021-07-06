@@ -57,8 +57,8 @@ def add_moving_avg(df):
 
     for day in allDays:
         if day in feelingDays:
-            row_that_day = df.loc[df["Day"] == day]
-            feeling_that_day = row_that_day.iloc[0]['response_feeling']
+            rows_that_day = df.loc[df["Day"] == day]
+            feeling_that_day = rows_that_day['response_feeling'].mean()
             allFeelings.append(feeling_that_day)
         else:
             allFeelings.append(float('nan'))

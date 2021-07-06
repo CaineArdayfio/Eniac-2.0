@@ -45,7 +45,7 @@ def get_data(request):
         this_dict = {"Date": this_date.strftime('%Y-%m-%d'), "Day": day+1}
         if (df_aggregate['Date'] == this_date).any(): # (if this day has a row (i.e. if it has any data at all))
             this_row = df_aggregate.loc[df_aggregate['Date'] == this_date].iloc[0]
-            this_dict["Feeling"] = int(this_row["Feeling"])
+            this_dict["Feeling"] = this_row["Feeling"]
             if this_row["Summary"] is not None: # (if this row has a summary)
                 this_dict["Summary"] = this_row["Summary"]
                 this_dict["Summary Length"] = len(this_row["Summary"])
@@ -65,10 +65,6 @@ def get_data(request):
 def receive(request):
     body = request.POST.get('Body')
     fromNum = str(request.POST.get('From'))[2:]
-    print("-------------------------")
-    print(body)
-    print(fromNum)
-    print("-------------------------")
     response = MessagingResponse()
 
     if utils.is_int(body) or utils.is_emoji(body):
