@@ -1,0 +1,478 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Surveys {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<!-- Timepicker css -->
+<link type="text/css" href="/static/assets/css/plugins/bootstrap-timepicker.min.css" />
+<!-- Select2 css -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock stylesheets %}
+
+{% block content %}
+
+
+    <!-- [ Main Content ] start -->
+    <section class="pcoded-main-container">
+      <div class="pcoded-content">
+				<div class="row">
+					<!-- [ modal ] start -->
+					<div id="exampleModalLong" class="modal fade" tabindex="-1" aria-labelledby="exampleModalLongTitle" aria-hidden="true" style="display: none;">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="exampleModalLongTitle">Create a new survey</h5>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+								</div>
+								<div class="modal-body">
+									<div class="col-md-12">
+										<div class="card">
+											<div class="card-body">
+												<div class="bt-wizard" id="progresswizard">
+													<ul class="nav nav-pills nav-fill mb-3">
+														<li class="nav-item"><a href="#progress-t-tab1" class="nav-link active" data-toggle="tab">Question Info</a></li>
+														<li class="nav-item"><a href="#progress-t-tab2" class="nav-link" data-toggle="tab">Recipients</a></li>
+													</ul>
+													<div id="bar" class="bt-wizard progress mb-3" style="height:6px">
+														<div class="progress-bar bg-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 33.33333333333333%;"></div>
+													</div>
+                          <form id="myform">
+                          {% csrf_token %}
+  													<div class="tab-content">
+  														<div class="tab-pane show active" id="progress-t-tab1">
+																<div class="form-group row">
+																	<label for="progress-t-name" class="col-sm-3 col-form-label">Name</label>
+																	<div class="col-sm-9">
+																		<input name="name" type="text" class="form-control" id="progress-t-name">
+																	</div>
+																</div>
+																<div class="form-group row">
+																	<label for="progress-t-question" class="col-sm-3 col-form-label">Question</label>
+																	<div class="col-sm-9">
+																		<input name="question" type="email" class="form-control" id="progress-t-question">
+																	</div>
+																</div>
+																<div class="form-group row">
+																	<label for="progress-t-time" class="col-sm-3 col-form-label">Time</label>
+																	<div class="col-sm-9">
+                                    <div class="input-group bootstrap-timepicker timepicker">
+                                      <input id="timepicker1" type="text" class="form-control input-small" name="time">
+                                      <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                    </div>
+																	</div>
+																</div>
+  														</div>
+  														<div class="tab-pane" id="progress-t-tab2">
+																<div class="form-group row">
+																	<label for="progress-t-address" class="col-sm-3 col-form-label">User Group</label>
+																	<div class="col-sm-9">
+              											<select style="width: 100%" id="group-select" name="group-select"></select>
+																	</div>
+																</div>
+  														</div>
+  														<div class="row justify-content-between btn-page">
+  															<div class="col-sm-6">
+  																<a href="#!" class="btn btn-primary button-previous disabled">Previous</a>
+  															</div>
+  															<div class="col-sm-6 text-md-right">
+  																<a href="#!" class="btn btn-primary button-next">Next</a>
+  															</div>
+  														</div>
+													  </div>
+                          </form>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" id="survey-edit-create-button"></button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- [ modal ] end -->
+
+
+					<div class="col-xl-12 col-lg-12 filter-bar">
+            <!-- [ task-nav ] start -->
+						<nav class="navbar m-b-30 p-10">
+							<ul class="nav">
+								<li class="nav-item f-text active">
+									<a class="nav-link text-secondary" href="#!">Filter: <span class="sr-only">(current)</span></a>
+								</li>
+								<li class="nav-item dropdown">
+									<a class="nav-link dropdown-toggle text-secondary" href="#" id="bydate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="far fa-clock"></i> By Date</a>
+									<div class="dropdown-menu" aria-labelledby="bydate">
+										<a class="dropdown-item" href="#!" data-sort-value="all">Show all</a>
+										<div class="dropdown-divider"></div>
+										<a class="dropdown-item" href="#!" data-sort-value="today">Today</a>
+										<a class="dropdown-item" href="#!" data-sort-value="yesterday">Yesterday</a>
+										<a class="dropdown-item" href="#!" data-sort-value="week">This week</a>
+										<a class="dropdown-item" href="#!" data-sort-value="month">This month</a>
+										<a class="dropdown-item" href="#!" data-sort-value="year">This year</a>
+									</div>
+								</li>
+							</ul>
+							<div class="nav-item nav-grid f-view">
+                <button type="button" class="btn  btn-primary" id="survey-create-button">New Survey</button>
+							</div>
+						</nav>
+						<!-- [ task-nav ] end -->
+
+						<!-- [ task-board ] start -->
+						<div class="row grid">
+              {% for question in surveys.active_surveys %}
+              <div class="col-md-6 col-sm-12 survey-container" data-id="{{ question.id }}">
+  							<div class="card card-border-c-{% cycle 'blue' 'red' 'green' 'yellow'%}">
+  								<div class="card-header">
+  									<a href="#!" class="text-secondary question_name"><strong>{{ question.question_name }} </strong></a>
+  									<span class="label label-primary float-right creation_date"> Created {{ question.creation_date.date }} </span>
+  								</div>
+  								<div class="card-body card-task">
+  									<div class="row">
+  										<div class="col-sm-12">
+  											<p class="task-detail">{{ question.question_text }}</p>
+  											<p class="task-due">Survey will send at <!--Survey sent out at {{ question.time|time }} everyday--></p>
+  										</div>
+  									</div>
+  									<hr>
+  									<div class="task-list-table">
+  										{% for group in question.groups.all %}<a href="{% url 'users' %}"><span class="badge badge-light-{% cycle 'primary' 'danger' 'success' 'warning'%}">{{ group }}</span></a>{% endfor %}
+  									</div>
+  									<div class="task-board">
+  										<div class="dropdown-secondary dropdown">
+  											<button type="button" data-q-id="{{ question.id }}" class="view-results btn btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm">View Results</button>
+  										</div>
+  										<div class="dropdown-secondary dropdown">
+  											<button class="btn waves-effect waves-light btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm dropdown-toggle b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-bars"></i></button>
+  											<div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                          <a class="dropdown-item survey-finish" data-q-id="{{ question.id }}" href="#!">Finish Survey</a>
+  												<a class="dropdown-item survey-edit-button" href="#!">Edit</a>
+  												<a class="dropdown-item question_remove" data-q-id="{{ question.id }}" href="#!">Delete</a>
+  											</div>
+  										</div>
+  									</div>
+  								</div>
+  							</div>
+  						</div>
+              {% endfor %}
+              {% for question in surveys.finished_surveys %}
+              <div class="col-md-6 col-sm-12 survey-container" data-id="{{ question.id }}">
+  							<div class="card card-border-c-{% cycle 'blue' 'red' 'green' 'yellow'%}">
+  								<div class="card-header">
+  									<a href="#!" class="text-secondary question_name"><strong>{{ question.question_name }} </strong></a>
+  									<span class="label label-primary float-right creation_date"> Created {{ question.creation_date.date }} </span>
+  								</div>
+  								<div class="card-body card-task">
+  									<div class="row">
+  										<div class="col-sm-12">
+  											<p class="task-detail">{{ question.question_text }}</p>
+  											<p>This survey has ended</p>
+  										</div>
+  									</div>
+  									<hr>
+  									<div class="task-list-table">
+  										{% for group in question.groups.all %}<a href="{% url 'users' %}"><span class="badge badge-light-{% cycle 'primary' 'danger' 'success' 'warning'%}">{{ group }}</span></a>{% endfor %}
+  									</div>
+  									<div class="task-board">
+  										<div class="dropdown-secondary dropdown">
+  											<button type="button" data-q-id="{{ question.id }}" class="view-results btn btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm">View Results</button>
+  										</div>
+  									</div>
+  								</div>
+  							</div>
+  						</div>
+              {% endfor %}
+					  </div>
+					  <!-- [ task-board ] end -->
+				  </div>
+      </div>
+    </section>
+    <!-- [ Main Content ] end -->
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script type="text/javascript" src="/static/assets/js/plugins/bootstrap-timepicker.min.js"></script>
+    <script src="/static/assets/js/pages/dashboard-main.js"></script>
+		<!-- Input mask Js -->
+		<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/plugins/jquery.mask.min.js"></script>
+		<!-- task-board js -->
+		<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/pages/task-board.js"></script>
+		<!-- wizard js -->
+		<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/plugins/jquery.bootstrap.wizard.min.js"></script>
+    <!-- cookie js (necessary for CSRF token in ajax post requests) -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <!-- isotope (grid animations) -->
+    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
+    <!-- packery and draggability js -->
+    <script src="https://unpkg.com/packery@2/dist/packery.pkgd.js"></script>
+    <script src="https://unpkg.com/draggabilly@2/dist/draggabilly.pkgd.js"></script>
+    <!-- Select2 js -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- cookie js (necessary for CSRF token in ajax post requests) -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <!-- utilities js (tools I created) -->
+    <script src="/static/assets/js/survey-data/utilities.js"></script>
+    <script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/plugins/bootstrap-notify.min.js"></script>
+
+		<script>
+	    $(document).ready(function() {
+        URL_SCHEDULE = "https://eniacprofessional.azurewebsites.net/api/orchestrators/filler"
+        // [ Select Group Dropdown ] start
+        $('#group-select').select2({
+          dropdownParent: $('#exampleModalLong'),
+          ajax: {
+            url: "{% url 'all_groups' %}",
+            dataType: 'json'
+          }
+        });
+        // [ Select Group Dropdown ] end
+
+        // [ "survey time" html attribute ] start
+        $('.task-due').each(function(){
+          parent_div = $(this).closest('.survey-container')
+          q_id = parent_div.attr('data-id')
+          $.ajaxSetup({
+              headers: { "X-CSRFToken": Cookies.get('csrftoken')}
+          });
+          $.ajax({
+            url : "{% url 'survey_details' %}",//"survey_details/",
+            type : "POST",
+            data : {id: q_id},
+            context: this,
+            success : function(json){
+              // UTC to Local
+              var time = json['time']
+              time = new Date(time)
+              var offset = new Date().getTimezoneOffset()
+              new_time = new Date(time.getTime() - offset*60000)
+
+              var hours = new_time.getUTCHours() ; // gives the hour in the local time zone
+              var AmOrPm = hours >= 12 ? 'PM' : 'AM';
+              hours = (hours % 12) || 12;
+              var minutes = (new_time.getMinutes() < 10 ? '0' : '') + new_time.getMinutes(); // gives the minutes
+              var displayTime = hours + ":" + minutes + " " + AmOrPm;
+              $(this).text("Survey will send at " + displayTime)
+            }
+          })
+        })
+        // [ "survey time" html attribute ] end
+
+        $('#timepicker1').timepicker();
+
+
+        // [ ALL SURVEY DATA ] start
+        function getSurveyData(){
+          results = ajaxPostRequest("{% url 'all_questions' %}", {}, null, async=false)
+          return results.responseJSON
+        }
+        // [ ALL SURVEY DATA ] end
+
+        // [ DRAGGABILITY ] start
+        /*
+        var $grid = $('.grid').packery({
+          itemSelector: '.survey-container',
+          columnWidth: 100
+        });
+        $grid.find('.survey-container').each( function( i, gridItem ) {
+          var draggie = new Draggabilly( gridItem );
+          $grid.packery( 'bindDraggabillyEvents', draggie );
+        });
+        */
+        // [ DRAGGABILITY ] end
+
+        // [ISOTOPE SETUP] start
+        var $grid = $('.grid').isotope({
+          itemSelector: '.survey-container',
+          layoutMode: 'fitRows'
+        });
+        // [ISOTOPE SETUP] end
+
+        // [ TIME SINCE PUBLICATION FILTER ] start
+        $('ul.nav li.dropdown div.dropdown-menu').on( 'click', 'a', function(json) {
+          // $(this) = <a class="dropdown-item">
+          var sort_value = $(this).attr('data-sort-value');
+          var survey_data = getSurveyData()
+          var today = new Date()
+          today.setHours(0,0,0,0);
+
+          function checkRecency(q_data, sort_value){
+            var creation_date = new Date(q_data['creation_date'])
+            creation_date.setHours(0,0,0,0);
+
+            const diffTime = Math.abs(today - creation_date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if(sort_value == "today"){
+              return diffDays == 0
+            }else if(sort_value == "yesterday"){
+              return diffDays === 1
+            }else if(sort_value == "week"){
+              return diffDays <= 7
+            }else if(sort_value == "month"){
+              return diffDays <= 30
+            }else if(sort_value == "year"){
+              return diffDays <= 365
+            }
+          }
+
+          $grid.isotope({
+            filter: function() {
+              // $(this) = [<div class="col-md-6 col-sm-12 survey-container" data-id="1">], then it equals [<div class="col-md-6 col-sm-12 survey-container" data-id="2">], then [<div class="col-md-6 col-sm-12 survey-container" data-id="3">]...
+              var q_id = $(this).attr('data-id')
+              return checkRecency(survey_data[q_id], sort_value)
+            }
+          })
+        })
+        // [ TIME SINCE PUBLICATION FILTER ] end
+
+        // [ FINISH SURVEY ] start
+        $(".survey-finish").click(function(){
+          var parent_div = $(this).closest('.survey-container')
+          var q_id = parent_div.attr('data-id');
+
+          ajaxPostRequest("{% url 'finish_survey' %}", { id: q_id }, function(json) {
+            ajaxPostRequest(URL_SCHEDULE, {}, function(){
+              location.reload()
+            })
+          })
+        })
+        // [ FINISH SURVEY ] end
+
+        // [ VIEW RESULTS ] start
+        $(".view-results").click(function(){
+          q_id = $(this).attr('data-q-id')
+          ajaxPostRequest("{% url 'survey_details' %}", {id: q_id}, function(json){
+            if (json.responses.length == 0){ // If this survey has 0 user responses
+              notify("No Results", "This survey does not have any user responses yet", "top", "right", "feather icon-layers", "primary", "animated fadeInRight", "animated fadeOutRight");
+            }else{
+              window.location = "{% url 'results' 1 %}".replace(/1/, parseInt(q_id))
+            }
+          })
+        })
+        // [ VIEW RESULTS ] end
+
+        // [ DELETE SURVEY ] start
+        $(".question_remove").click(function() {
+          var parent_div = $(this).closest('.survey-container')
+          var q_id = parent_div.attr('data-id');
+
+          ajaxPostRequest("{% url 'delete_survey' %}", { id: q_id }, function(json) {
+            $grid.isotope( 'remove', parent_div ).isotope('layout');
+            ajaxPostRequest(URL_SCHEDULE, {}, null)
+          })
+        });
+        // [ DELETE SURVEY ] end
+
+        // [ CREATE/EDIT SURVEY ] start
+				$('#survey-edit-create-button').click(function(){
+          $("#exampleModalLong").modal('hide');
+
+          name = $("form#myform input[name='name']").val()
+          question = $("form#myform input[name='question']").val()
+          time = $("form#myform input[name='time']").val()
+
+          const convertTime12to24 = (time12h) => {
+            const [time, modifier] = time12h.split(' ');
+            let [hours, minutes] = time.split(':');
+            if (hours === '12') {
+              hours = '00';
+            }
+            if (modifier === 'PM') {
+              hours = parseInt(hours, 10) + 12;
+            }
+            return [hours, minutes];
+          }
+
+          time = convertTime12to24(time)
+          time = new Date(Date.UTC(1, 0, 1, parseInt(time[0]), parseInt(time[1]), 0))
+          var offset = new Date().getTimezoneOffset()
+          time = new Date(time.getTime() + offset*60000)
+          if (time.getDay() == 2){
+            time = new Date(Date.UTC(1, 0, 1, time.getUTCHours(), time.getMinutes(), 0))
+          }
+          time = time.toISOString();
+
+          group = $('#group-select').find(':selected').text()
+
+          if ($(this).attr('data-type') == "create-survey"){
+            ajaxPostRequest("{% url 'new_survey' %}", { name: name, question: question, time: time, group: group}, function(json1){
+              ajaxPostRequest(URL_SCHEDULE, {}, function(json2){
+                location.reload();
+              })
+            })
+          }else if($(this).attr('data-type') == "edit-survey"){
+            ajaxPostRequest("{% url 'edit_survey' %}", { id: $(this).attr('data-edit-survey-id'), name: name, question: question, time: time, group: group}, function(json1){
+              ajaxPostRequest(URL_SCHEDULE, {}, function(json2){
+                location.reload();
+              })
+            })
+          }
+				})
+        // [ CREATE/EDIT SURVEY ] end
+
+        // [ SHOW MODAL TO CREATE ] start
+        $('#survey-create-button').click(function(){
+          $('#survey-edit-create-button').attr('data-type', "create-survey")
+          $('#survey-edit-create-button').text("Create Survey")
+
+          $("form#myform input[name='name']").val("Survey #1")
+          $("form#myform input[name='question']").val("How do you feel about ...?")
+          $("form#myform input[name='time']").val("12:00 AM")
+
+          $("#exampleModalLong").modal('show');
+        })
+        // [ SHOW MODAL TO CREATE ] end
+
+        // [ SHOW MODAL TO EDIT ] start
+        $('.survey-edit-button').click(function(){
+          var parent_div = $(this).closest('.survey-container')
+          var q_id = parent_div.attr('data-id');
+
+          $('#survey-edit-create-button').attr('data-type', "edit-survey")
+          $('#survey-edit-create-button').attr('data-edit-survey-id', q_id)
+          $('#survey-edit-create-button').text("Save Changes")
+
+          ajaxPostRequest("{% url 'survey_details' %}", {id: q_id}, function(json){
+            // UTC to local
+            var time = json['time']
+            time = new Date(time)
+            var offset = new Date().getTimezoneOffset()
+            new_time = new Date(time.getTime() - offset*60000)
+
+            var hours = new_time.getUTCHours() ; // gives the hour in the local time zone
+            var AmOrPm = hours >= 12 ? 'PM' : 'AM';
+            hours = (hours % 12) || 12;
+            var minutes = (new_time.getMinutes() < 10 ? '0' : '') + new_time.getMinutes() ; // gives the minutes
+            var time = hours + ":" + minutes + " " + AmOrPm;
+            $("form#myform input[name='name']").val(json['name'])
+            $("form#myform input[name='question']").val(json['text'])
+            $("form#myform input[name='time']").val(time)
+          })
+          $("#exampleModalLong").modal('show');
+        })
+        // [ SHOW MODAL TO EDIT ] end
+
+        $('#progresswizard').bootstrapWizard({
+            withVisible: false,
+            'nextSelector': '.button-next',
+            'previousSelector': '.button-previous',
+
+            onTabShow: function(tab, navigation, index) {
+                var $total = navigation.find('li').length;
+                var $current = index + 1;
+                var $percent = ($current / $total) * 100;
+                $('#progresswizard .progress-bar').css({
+                    width: $percent + '%'
+                });
+            },
+        });
+    });
+
+		</script>
+{% endblock javascripts %}
