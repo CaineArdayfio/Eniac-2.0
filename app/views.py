@@ -11,6 +11,7 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 import dateutil.parser
 from datetime import datetime, timezone, timedelta
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
 
 
@@ -148,12 +149,54 @@ def new_user(request):
 
 
 
+def update_tasks():
+    PeriodicTask.objects.exclude(name="celery.backend_cleanup").delete()
+    for q in Question.objects.all():
+        if q.status == "finished":
+            continue
+        week_day = q.start_date.weekday()
+        hr = q.time.hour
+        m = q.time.minute
+
+        if q.frequency == 'Daily':
+            #cron_expression = f'{m} {hr} * * *'
+            schedule, _ = CrontabSchedule.objects.get_or_create(
+                minute=m, hour=hr, day_of_week="*", day_of_month="*", month_of_year="*",
+            )
+        elif q.frequency == 'Weekly':
+            #cron_expression = f'{m} {hr} * * {week_day+1}'
+            schedule, _ = CrontabSchedule.objects.get_or_create(
+                minute=m, hour=hr, day_of_week="*", day_of_month="*", month_of_year=str(week_day+1),
+            )
+        elif q.frequency == 'Monthly':
+            #cron_expression = f'{m} {hr} 1-7 * {week_day+1}'
+            schedule, _ = CrontabSchedule.objects.get_or_create(
+                minute=m, hour=hr, day_of_week="1-7", day_of_month="*", month_of_year=str(week_day+1),
+            )
+
+        phones = []
+
+        for q_group in q.groups.all(): # get the groups associated with this question (theoretically just 1 group)
+            for user in q_group.users.all(): # go through the users associated with that group
+                phones.append(''.join(e for e in user.phone_number if e.isalnum())) # add that users phone number
+
+        PeriodicTask.objects.update_or_create(
+            name=q.question_name,
+            task='app.celery.send_sms',
+            start_time=q.start_date, # set to start sending out text messages 12:00am of this day #datetime.combine(q.start_date, q.time),
+            args=json.dumps([q.id, q.question_name, q.question_text, phones]),
+            defaults=dict(
+                crontab=schedule,
+            ),
+        )
+
+
 def all_questions(request):
     if request.method == 'POST':
         questions = list(Question.objects.all())
         response_data = {}
         for q in questions:
-            response_data[q.id] = {"name": q.question_name, "text": q.question_text, "creation_date": q.creation_date, "time": q.time}
+            response_data[q.id] = {"name": q.question_name, "text": q.question_text, "creation_date": q.creation_date, "time": q.time, "start_date": q.start_date, "end_date": q.end_date}
 
         return HttpResponse(
             json.dumps(response_data, cls=DjangoJSONEncoder),
@@ -172,6 +215,10 @@ def survey_details(request):
         response_data['text'] = q.question_text
         response_data['creation_date'] = q.creation_date
         response_data['time'] = q.time
+        response_data['start_date'] = q.start_date
+        response_data['end_date'] = q.end_date
+        response_data['frequency'] = q.frequency
+
         responses = UserResponse.objects.filter(question_id=q_id)
         response_data['responses'] = {
             'length': len(responses),
@@ -203,6 +250,7 @@ def delete_survey(request):
     response_data = {}
     response_data['result'] = 'Delete survey successful'
     response_data['id'] = q_id
+    update_tasks()
     return HttpResponse(
         json.dumps(response_data),
         content_type="application/json"
@@ -210,13 +258,14 @@ def delete_survey(request):
 
 def finish_survey(request):
     q_id = request.POST.get('id')
+    status = request.POST.get('status')
 
     q = Question.objects.get(id=q_id)
-    q.status = "finished"
+    q.status = status
     q.save(update_fields=['status'])
-
+    update_tasks()
     response_data = {}
-    response_data['result'] = 'Finish survey successful'
+    response_data['result'] = 'Status change was successful'
     response_data['id'] = q_id
     return HttpResponse(
         json.dumps(response_data),
@@ -232,11 +281,17 @@ def edit_survey(request):
         group_name = request.POST.get('group')
         time = request.POST.get('time') # an ISO string in UTC from frontend
         time = dateutil.parser.parse(time) # the ISO string as a datetime object (timezone included)
+        frequency = request.POST.get('frequency')
+        start_date = dateutil.parser.parse(request.POST.get('start_date')).date()
+        end_date = dateutil.parser.parse(request.POST.get('end_date')).date()
 
         q = Question.objects.get(id=q_id)
         q.question_name = question_name
         q.question_text = question_text
         q.time = time
+        q.frequency = frequency
+        q.start_date = start_date
+        q.end_date = end_date
         q.save()
 
         if q.groups.exists(): # if this question has an associated group, remove that group
@@ -245,7 +300,7 @@ def edit_survey(request):
         if group_name is not "": # if they don't enter a group for the question
             new_g = Group.objects.get(group_name=group_name)
             q.groups.add(new_g)
-
+        update_tasks()
         return HttpResponse('Successfully edited question ' + q_id)
     return HttpResponseRedirect(reverse("home"))
 
@@ -255,13 +310,16 @@ def new_survey(request):
         question_text = request.POST.get('question')
         time = request.POST.get('time') # an ISO string in UTC from frontend
         time = dateutil.parser.parse(time) # the ISO string as a datetime object (timezone included)
-        q = Question(question_name=question_name, question_text=question_text, time=time, status="active")
+        frequency = request.POST.get('frequency')
+        start_date = dateutil.parser.parse(request.POST.get('start_date')).date()
+        end_date = dateutil.parser.parse(request.POST.get('end_date')).date()
+        q = Question(question_name=question_name, question_text=question_text, time=time, frequency=frequency, start_date=start_date, end_date=end_date, status="active")
         q.save()
 
         group_name = request.POST.get('group')
         g = Group.objects.get(group_name=group_name)
         q.groups.add(g)
-
+        update_tasks()
         return HttpResponse('Successfully added question ' + question_name)
     return HttpResponseRedirect(reverse("home"))
 
@@ -278,7 +336,7 @@ def surveys(request):
     }
     context['segment'] = 'index'
 
-    html_template = loader.get_template( 'index.html' )
+    html_template = loader.get_template( 'surveys.html' )
 
     return HttpResponse(html_template.render(context, request))
 
@@ -418,7 +476,7 @@ def overview(request):
     }
     context['segment'] = 'index'
 
-    html_template = loader.get_template( 'dashboard-sale.html' )
+    html_template = loader.get_template( 'overview.html' )
 
     return HttpResponse(html_template.render(context, request))
 
@@ -426,7 +484,7 @@ def overview(request):
 def users(request):
     context = {}
 
-    html_template = loader.get_template( 'user-list.html' )
+    html_template = loader.get_template( 'users.html' )
     return HttpResponse(html_template.render(context, request))
 
 @login_required(login_url="/login/")
@@ -435,7 +493,7 @@ def results(request, survey_id):
     context['survey'] = Question.objects.get(id=survey_id)
     context['segment'] = 'index'
 
-    html_template = loader.get_template( 'widget-chart.html' )
+    html_template = loader.get_template( 'results.html' )
 
     return HttpResponse(html_template.render(context, request))
 

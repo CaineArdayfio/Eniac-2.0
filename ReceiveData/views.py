@@ -30,13 +30,14 @@ def get_data(request):
 
     totalDays = (lastDay-firstDay).days + 1
 
-    df_aggregate = pd.DataFrame(columns=["Feeling", "Summary", "Day", "Date"])
+    df_aggregate = pd.DataFrame(columns=["Feeling", "Summary", "Day", "Date", "All_Feelings"])
     df_aggregate["Day"] = df['Day'].unique()
     df_aggregate.set_index('Day', inplace=True)
     for day in df['Day'].unique():
         responses_on_day = df.loc[df['Day'] == day] # get all responses that ocurred on the specified day
         days_mean = responses_on_day['response_feeling'].mean() # the mean response on that day
         df_aggregate['Feeling'][day] = days_mean
+        df_aggregate['All_Feelings'][day] = list(responses_on_day['response_feeling'])
         df_aggregate['Summary'][day] = '\n'.join(list(responses_on_day['response_summary']))
         df_aggregate['Date'][day] = list(responses_on_day['response_time'])[0].date()
 
@@ -46,6 +47,7 @@ def get_data(request):
         if (df_aggregate['Date'] == this_date).any(): # (if this day has a row (i.e. if it has any data at all))
             this_row = df_aggregate.loc[df_aggregate['Date'] == this_date].iloc[0]
             this_dict["Feeling"] = this_row["Feeling"]
+            this_dict["All_Feelings"] = this_row["All_Feelings"]
             if this_row["Summary"] is not None: # (if this row has a summary)
                 this_dict["Summary"] = this_row["Summary"]
                 this_dict["Summary Length"] = len(this_row["Summary"])

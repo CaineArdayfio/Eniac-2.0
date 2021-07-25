@@ -20,6 +20,9 @@ class Question(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=200)
     time = models.DateTimeField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    frequency = models.CharField(max_length=200)
     groups = models.ManyToManyField(Group)
 
     class Meta:

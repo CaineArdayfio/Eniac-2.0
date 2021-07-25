@@ -4,10 +4,14 @@
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-<!-- Timepicker css -->
-<link type="text/css" href="/static/assets/css/plugins/bootstrap-timepicker.min.css" />
 <!-- Select2 css -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!--<link href="/static/assets/css/plugins/datetimepicker.css" rel="stylesheet" type="text/css"/>-->
+<!-- Timepicker css -->
+<link type="text/css" href="/static/assets/css/plugins/bootstrap-timepicker.min.css" />
+<link rel="stylesheet" href="/static/assets/css/plugins/daterangepicker.css">
+<!--<link rel="stylesheet" href="https://appsrv1-147a1.kxcdn.com/gradient-pro/css/plugins/daterangepicker.css">-->
 {% endblock stylesheets %}
 
 {% block content %}
@@ -40,28 +44,44 @@
                           <form id="myform">
                           {% csrf_token %}
   													<div class="tab-content">
-  														<div class="tab-pane show active" id="progress-t-tab1">
-																<div class="form-group row">
-																	<label for="progress-t-name" class="col-sm-3 col-form-label">Name</label>
-																	<div class="col-sm-9">
+                              <div class="tab-pane show active" id="progress-t-tab1">
+                                <div class="form-group row">
+																	<label for="progress-t-name" class="col-sm-4 col-form-label">Name</label>
+																	<div class="col-sm-8">
 																		<input name="name" type="text" class="form-control" id="progress-t-name">
 																	</div>
 																</div>
 																<div class="form-group row">
-																	<label for="progress-t-question" class="col-sm-3 col-form-label">Question</label>
-																	<div class="col-sm-9">
+																	<label for="progress-t-question" class="col-sm-4 col-form-label">Question</label>
+																	<div class="col-sm-8">
 																		<input name="question" type="email" class="form-control" id="progress-t-question">
 																	</div>
 																</div>
-																<div class="form-group row">
-																	<label for="progress-t-time" class="col-sm-3 col-form-label">Time</label>
-																	<div class="col-sm-9">
+                                <div class="form-group row">
+																	<label for="progress-t-time" class="col-sm-4 col-form-label">Starting Time</label>
+																	<div class="col-sm-8">
                                     <div class="input-group bootstrap-timepicker timepicker">
                                       <input id="timepicker1" type="text" class="form-control input-small" name="time">
                                       <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
                                     </div>
 																	</div>
 																</div>
+                                <div class="form-group row">
+																	<label for="progress-t-time" class="col-sm-4 col-form-label">Date Range</label>
+																	<div class="col-sm-8">
+                                    <input type="text" name="daterange" id="daterange" class="form-control">
+																	</div>
+																</div>
+                                <div class="form-group row">
+                                    <label class="col-sm-4" for="exampleFormControlSelect1">Frequency</label>
+                                    <div class="col-sm-8">
+                                      <select class="form-control" name="frequency" id="frequency-select">
+                                          <option value="Daily">Daily</option>
+                                          <option value="Weekly">Weekly</option>
+                                          <option value="Monthly">Monthly</option>
+                                      </select>
+                                    </div>
+                                </div>
   														</div>
   														<div class="tab-pane" id="progress-t-tab2">
 																<div class="form-group row">
@@ -70,14 +90,6 @@
               											<select style="width: 100%" id="group-select" name="group-select"></select>
 																	</div>
 																</div>
-  														</div>
-  														<div class="row justify-content-between btn-page">
-  															<div class="col-sm-6">
-  																<a href="#!" class="btn btn-primary button-previous disabled">Previous</a>
-  															</div>
-  															<div class="col-sm-6 text-md-right">
-  																<a href="#!" class="btn btn-primary button-next">Next</a>
-  															</div>
   														</div>
 													  </div>
                           </form>
@@ -125,7 +137,7 @@
 						<!-- [ task-board ] start -->
 						<div class="row grid">
               {% for question in surveys.active_surveys %}
-              <div class="col-md-6 col-sm-12 survey-container" data-id="{{ question.id }}">
+              <div class="col-md-6 col-sm-12 survey-container" data-id="{{ question.id }}" data-status="{{ question.status }}">
   							<div class="card card-border-c-{% cycle 'blue' 'red' 'green' 'yellow'%}">
   								<div class="card-header">
   									<a href="#!" class="text-secondary question_name"><strong>{{ question.question_name }} </strong></a>
@@ -135,7 +147,7 @@
   									<div class="row">
   										<div class="col-sm-12">
   											<p class="task-detail">{{ question.question_text }}</p>
-  											<p class="task-due">Survey will send at <!--Survey sent out at {{ question.time|time }} everyday--></p>
+  											<p class="task-due">Survey will send at </p>
   										</div>
   									</div>
   									<hr>
@@ -143,13 +155,17 @@
   										{% for group in question.groups.all %}<a href="{% url 'users' %}"><span class="badge badge-light-{% cycle 'primary' 'danger' 'success' 'warning'%}">{{ group }}</span></a>{% endfor %}
   									</div>
   									<div class="task-board">
+                      <div class="switch switch-primary d-inline m-r-10">
+                          <input type="checkbox" id="switch-p-{{ question.id }}" checked="" class="toggle-status">
+                          <label for="switch-p-{{ question.id }}" class="cr"></label>
+                      </div>
   										<div class="dropdown-secondary dropdown">
   											<button type="button" data-q-id="{{ question.id }}" class="view-results btn btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm">View Results</button>
   										</div>
   										<div class="dropdown-secondary dropdown">
   											<button class="btn waves-effect waves-light btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm dropdown-toggle b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-bars"></i></button>
   											<div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                          <a class="dropdown-item survey-finish" data-q-id="{{ question.id }}" href="#!">Finish Survey</a>
+
   												<a class="dropdown-item survey-edit-button" href="#!">Edit</a>
   												<a class="dropdown-item question_remove" data-q-id="{{ question.id }}" href="#!">Delete</a>
   											</div>
@@ -163,8 +179,8 @@
               <div class="col-md-6 col-sm-12 survey-container" data-id="{{ question.id }}">
   							<div class="card card-border-c-{% cycle 'blue' 'red' 'green' 'yellow'%}">
   								<div class="card-header">
-  									<a href="#!" class="text-secondary question_name"><strong>{{ question.question_name }} </strong></a>
-  									<span class="label label-primary float-right creation_date"> Created {{ question.creation_date.date }} </span>
+                      <a href="#!" class="text-secondary question_name"><strong>{{ question.question_name }} </strong></a>
+    									<span class="label label-primary float-right creation_date"> Created {{ question.creation_date.date }} </span>
   								</div>
   								<div class="card-body card-task">
   									<div class="row">
@@ -178,8 +194,18 @@
   										{% for group in question.groups.all %}<a href="{% url 'users' %}"><span class="badge badge-light-{% cycle 'primary' 'danger' 'success' 'warning'%}">{{ group }}</span></a>{% endfor %}
   									</div>
   									<div class="task-board">
+                      <div class="switch switch-primary d-inline m-r-10">
+                          <input type="checkbox" id="switch-p-{{ question.id }}" class="toggle-status">
+                          <label for="switch-p-{{ question.id }}" class="cr"></label>
+                      </div>
   										<div class="dropdown-secondary dropdown">
   											<button type="button" data-q-id="{{ question.id }}" class="view-results btn btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm">View Results</button>
+  										</div>
+                      <div class="dropdown-secondary dropdown">
+  											<button class="btn waves-effect waves-light btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm dropdown-toggle b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-bars"></i></button>
+  											<div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+  												<a class="dropdown-item question_remove" data-q-id="{{ question.id }}" href="#!">Delete</a>
+  											</div>
   										</div>
   									</div>
   								</div>
@@ -188,6 +214,7 @@
               {% endfor %}
 					  </div>
 					  <!-- [ task-board ] end -->
+
 				  </div>
       </div>
     </section>
@@ -196,16 +223,12 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-    <script type="text/javascript" src="/static/assets/js/plugins/bootstrap-timepicker.min.js"></script>
-    <script src="/static/assets/js/pages/dashboard-main.js"></script>
 		<!-- Input mask Js -->
 		<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/plugins/jquery.mask.min.js"></script>
 		<!-- task-board js -->
 		<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/pages/task-board.js"></script>
 		<!-- wizard js -->
 		<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/plugins/jquery.bootstrap.wizard.min.js"></script>
-    <!-- cookie js (necessary for CSRF token in ajax post requests) -->
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
     <!-- isotope (grid animations) -->
     <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
     <!-- packery and draggability js -->
@@ -215,14 +238,25 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- cookie js (necessary for CSRF token in ajax post requests) -->
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha512-Meww2sXqNHxI1+5Dyh/9KAtvI9RZSA4c1K2k5iL02oiPO/RH3Q30L3M1albtqMg50u4gRTYdV4EXOQqXEI336A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <!-- utilities js (tools I created) -->
     <script src="/static/assets/js/survey-data/utilities.js"></script>
+
     <script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/plugins/bootstrap-notify.min.js"></script>
 
+    <!-- datepicker js -->
+    <script type="text/javascript" src="/static/assets/js/plugins/bootstrap-timepicker.min.js"></script>
+    <script src="/static/assets/js/plugins/moment.min.js"></script>
+    <script src="/static/assets/js/plugins/daterangepicker.js"></script>
+    <script src="/static/assets/js/pages/ac-datepicker.js"></script>
+
+<!--<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/pages/form-advance-custom.js"></script>-->
 		<script>
 	    $(document).ready(function() {
-        URL_SCHEDULE = "https://eniacprofessional.azurewebsites.net/api/orchestrators/filler"
+        $('#timepicker1').timepicker();
+
+
         // [ Select Group Dropdown ] start
         $('#group-select').select2({
           dropdownParent: $('#exampleModalLong'),
@@ -235,6 +269,7 @@
 
         // [ "survey time" html attribute ] start
         $('.task-due').each(function(){
+
           parent_div = $(this).closest('.survey-container')
           q_id = parent_div.attr('data-id')
           $.ajaxSetup({
@@ -260,10 +295,9 @@
               $(this).text("Survey will send at " + displayTime)
             }
           })
+          q_active = parent_div.attr('data-status')
         })
         // [ "survey time" html attribute ] end
-
-        $('#timepicker1').timepicker();
 
 
         // [ ALL SURVEY DATA ] start
@@ -273,18 +307,6 @@
         }
         // [ ALL SURVEY DATA ] end
 
-        // [ DRAGGABILITY ] start
-        /*
-        var $grid = $('.grid').packery({
-          itemSelector: '.survey-container',
-          columnWidth: 100
-        });
-        $grid.find('.survey-container').each( function( i, gridItem ) {
-          var draggie = new Draggabilly( gridItem );
-          $grid.packery( 'bindDraggabillyEvents', draggie );
-        });
-        */
-        // [ DRAGGABILITY ] end
 
         // [ISOTOPE SETUP] start
         var $grid = $('.grid').isotope({
@@ -298,6 +320,7 @@
           // $(this) = <a class="dropdown-item">
           var sort_value = $(this).attr('data-sort-value');
           var survey_data = getSurveyData()
+
           var today = new Date()
           today.setHours(0,0,0,0);
 
@@ -332,16 +355,15 @@
         // [ TIME SINCE PUBLICATION FILTER ] end
 
         // [ FINISH SURVEY ] start
-        $(".survey-finish").click(function(){
-          var parent_div = $(this).closest('.survey-container')
-          var q_id = parent_div.attr('data-id');
-
-          ajaxPostRequest("{% url 'finish_survey' %}", { id: q_id }, function(json) {
-            ajaxPostRequest(URL_SCHEDULE, {}, function(){
-              location.reload()
-            })
-          })
-        })
+        $('.toggle-status:checkbox').change(function() {
+            var parent_div = $(this).closest('.survey-container')
+            var q_id = parent_div.attr('data-id');
+            if (this.checked) { // the checkbox is now checked
+                ajaxPostRequest("{% url 'finish_survey' %}", { id: q_id, status: "active"}, null)
+            } else { // the checkbox is now no longer checked
+                ajaxPostRequest("{% url 'finish_survey' %}", { id: q_id, status: "finished" }, null)
+            }
+        });
         // [ FINISH SURVEY ] end
 
         // [ VIEW RESULTS ] start
@@ -364,7 +386,6 @@
 
           ajaxPostRequest("{% url 'delete_survey' %}", { id: q_id }, function(json) {
             $grid.isotope( 'remove', parent_div ).isotope('layout');
-            ajaxPostRequest(URL_SCHEDULE, {}, null)
           })
         });
         // [ DELETE SURVEY ] end
@@ -376,6 +397,9 @@
           name = $("form#myform input[name='name']").val()
           question = $("form#myform input[name='question']").val()
           time = $("form#myform input[name='time']").val()
+          daterange = $("form#myform input[name='daterange']").val()
+          frequency = $('#frequency-select').find(':selected').text()
+          group = $('#group-select').find(':selected').text()
 
           const convertTime12to24 = (time12h) => {
             const [time, modifier] = time12h.split(' ');
@@ -398,19 +422,17 @@
           }
           time = time.toISOString();
 
-          group = $('#group-select').find(':selected').text()
+          dates = daterange.split('-')
+          date1 = dates[0].replace(/\s/g,'')
+          date2 = dates[1].replace(/\s/g,'')
 
           if ($(this).attr('data-type') == "create-survey"){
-            ajaxPostRequest("{% url 'new_survey' %}", { name: name, question: question, time: time, group: group}, function(json1){
-              ajaxPostRequest(URL_SCHEDULE, {}, function(json2){
-                location.reload();
-              })
+            ajaxPostRequest("{% url 'new_survey' %}", { name: name, question: question, time: time, start_date: date1, end_date: date2, frequency: frequency, group: group }, function(json1){
+              location.reload();
             })
           }else if($(this).attr('data-type') == "edit-survey"){
-            ajaxPostRequest("{% url 'edit_survey' %}", { id: $(this).attr('data-edit-survey-id'), name: name, question: question, time: time, group: group}, function(json1){
-              ajaxPostRequest(URL_SCHEDULE, {}, function(json2){
-                location.reload();
-              })
+            ajaxPostRequest("{% url 'edit_survey' %}", { id: $(this).attr('data-edit-survey-id'), name: name, question: question, time: time, start_date: date1, end_date: date2,  frequency: frequency, group: group}, function(json1){
+              location.reload()
             })
           }
 				})
@@ -437,7 +459,6 @@
           $('#survey-edit-create-button').attr('data-type', "edit-survey")
           $('#survey-edit-create-button').attr('data-edit-survey-id', q_id)
           $('#survey-edit-create-button').text("Save Changes")
-
           ajaxPostRequest("{% url 'survey_details' %}", {id: q_id}, function(json){
             // UTC to local
             var time = json['time']
@@ -453,6 +474,16 @@
             $("form#myform input[name='name']").val(json['name'])
             $("form#myform input[name='question']").val(json['text'])
             $("form#myform input[name='time']").val(time)
+
+            var start = json['start_date']
+            var end = json['end_date']
+            start = start.replace(/-/g,'/')
+            end = end.replace(/-/g,'/')
+            var daterange = start + " - " + end
+            $("#daterange").val(daterange)
+
+            var frequency = json['frequency']
+            $("form#myform #frequency-select").val(frequency)
           })
           $("#exampleModalLong").modal('show');
         })
@@ -472,6 +503,8 @@
                 });
             },
         });
+
+
     });
 
 		</script>

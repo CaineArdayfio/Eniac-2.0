@@ -18,31 +18,31 @@
 				<!-- product profit start -->
 				<div class="col-xl-3 col-md-6">
 					<div class="card bg-c-blue order-card" onclick="location.href={% url 'surveys'%};" style="cursor: pointer;">
-            <div class="card-body">
-              <h6 class="text-white">Total Surveys</h6>
-              <h2 class="text-right text-white"><i class="feather icon-layers float-left"></i><span>{{ questions.total.count }}</span></h2>
-              <p class="m-b-0">Active Surveys<span class="float-right">{{ questions.active.count }}</span></p>
-            </div>
-          </div>
+						<div class="card-body">
+						<h6 class="text-white">Total Surveys</h6>
+						<h2 class="text-right text-white"><i class="feather icon-layers float-left"></i><span>{{ questions.total.count }}</span></h2>
+						<p class="m-b-0">Active Surveys<span class="float-right">{{ questions.active.count }}</span></p>
+						</div>
+					</div>
 				</div>
 				<div class="col-md-6 col-xl-3">
-            <div class="card bg-c-green order-card">
-                <div class="card-body">
-                    <h6 class="text-white">Completed Responses</h6>
-                    <h2 class="text-right text-white"><i class="feather icon-users float-left"></i><span>{{ user_responses.total.count }}</span></h2>
-                    <p class="m-b-0">This Month<span class="float-right">{{ user_responses.month.count }}</span></p>
-                </div>
-            </div>
-        </div>
+					<div class="card bg-c-green order-card">
+						<div class="card-body">
+							<h6 class="text-white">Completed Responses</h6>
+							<h2 class="text-right text-white"><i class="feather icon-users float-left"></i><span>{{ user_responses.total.count }}</span></h2>
+							<p class="m-b-0">This Month<span class="float-right">{{ user_responses.month.count }}</span></p>
+						</div>
+					</div>
+				</div>
 				<div class="col-md-6 col-xl-3">
-            <div class="card bg-c-yellow order-card">
-                <div class="card-body">
-                    <h6 class="text-white">Unique Users</h6>
-                    <h2 class="text-right text-white"><i class="feather icon-check-square float-left"></i><span>{{ users.total }}</span></h2>
-                    <p class="m-b-0">Active Users<span class="float-right">{{ users.active_users }}</span></p>
-                </div>
-            </div>
-        </div>
+					<div class="card bg-c-yellow order-card">
+						<div class="card-body">
+							<h6 class="text-white">Unique Users</h6>
+							<h2 class="text-right text-white"><i class="feather icon-check-square float-left"></i><span>{{ users.total }}</span></h2>
+							<p class="m-b-0">Active Users<span class="float-right">{{ users.active_users }}</span></p>
+						</div>
+					</div>
+        		</div>
 
 				<div class="col-md-6 col-xl-3">
 						<div class="card bg-c-red order-card">
@@ -144,7 +144,7 @@
 	};
 	</script>
 	<!-- cookie js (necessary for CSRF token in ajax post requests) -->
-	<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha512-Meww2sXqNHxI1+5Dyh/9KAtvI9RZSA4c1K2k5iL02oiPO/RH3Q30L3M1albtqMg50u4gRTYdV4EXOQqXEI336A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<!-- utilities js (tools I created) -->
 	<script src="/static/assets/js/survey-data/utilities.js"></script>
 	<script src="/static/assets/js/pages/dashboard-sale.js"></script>

@@ -13,3 +13,7 @@ whitenoise
 pycodestyle
 autopep8
 asgiref
+celery
+django_celery_beat
+redis
+stripe>=2.48.0,<3.0

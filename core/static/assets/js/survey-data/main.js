@@ -7,7 +7,6 @@ emoji_key = {
 }
 
 function plot_data(text){
-  console.log(text)
   am4core.options.queue = true;
   color1 = am4core.color("#3358f4");
   color2 = am4core.color("#1d8cf8");
@@ -174,12 +173,79 @@ function plot_data(text){
   users = json.responseJSON.responses.user_id // I get user data but I don't do anything with it to keep it anonymous ['User 1', 'User '1', 'User 2', 'User 2']
 
 
+
+
+
+
+
+
+
+  var breakdown = am4core.create("breakdown", am4charts.PieChart);
+
+  breakdown.legend = new am4charts.Legend();
+  breakdown.legend.position = "bottom";
+  breakdown.legend.fontSize = 25;
+  breakdown.legend.valueLabels.template.disabled = true;
+  //breakdown.legend.labels.template.maxWidth = 120;
+  //breakdown.legend.labels.template.truncate = true;
+  //breakdown.legend.itemContainers.template.tooltipText = "{feeling}";
+
+  var marker = breakdown.legend.markers.template.children.getIndex(0);
+  marker.cornerRadius(12, 12, 12, 12);
+  marker.strokeWidth = 2;
+  marker.strokeOpacity = 1;
+  //marker.stroke = am4core.color("#ccc");
+
+
+  // Add and configure Series
+  var pieSeries = breakdown.series.push(new am4charts.PieSeries());
+  pieSeries.dataFields.value = "count";
+  pieSeries.dataFields.category = "feeling";
+  pieSeries.slices.template.stroke = am4core.color("#fff");
+  pieSeries.slices.template.strokeWidth = 2;
+  pieSeries.slices.template.strokeOpacity = 1;
+
+  // This creates initial animation
+  pieSeries.hiddenState.properties.opacity = 1;
+  pieSeries.hiddenState.properties.endAngle = -90;
+  pieSeries.hiddenState.properties.startAngle = -90;
+  pieSeries.ticks.template.disabled = true;
+  pieSeries.labels.template.disabled = true;
+
+
+
   bullet.events.on("hit", function(event){
     date = event.target.dataItem.dataContext["Date"]; // this is the date of the object they clicked
     summary = event.target.dataItem.dataContext["Summary"]; // these are the summaries separated by linebreaks of the date of the datapoint they clicked (not useful because I need to correlate a summary with a user, not just all aggregate summaries)
     feeling = event.target.dataItem.dataContext["Feeling"]; // same deal as ^^
-
+    all_feeling = event.target.dataItem.dataContext["All_Feelings"]; // same deal as ^^
     $.notifyClose();
+
+    const counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+
+    for (const num of all_feeling) {
+      counts[num] = counts[num] ? counts[num] + 1 : 1;
+    }
+
+
+    breakdown.data = [ {
+      "feeling": "😭",
+      "count": counts[1]
+    }, {
+      "feeling": "🙁",
+      "count": counts[2]
+    }, {
+      "feeling": "😐",
+      "count": counts[3]
+    }, {
+      "feeling": "🙂",
+      "count": counts[4]
+    }, {
+      "feeling": "😃",
+      "count": counts[5]
+    }];
+    // Reanimate
+    breakdown.appear()
 
     if (summary == undefined){
       $('#response-table').html("")
@@ -213,8 +279,6 @@ function plot_data(text){
       $('#response-table').html(list_element)
     }
   })
-
-
 
 
 }
