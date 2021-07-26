@@ -6,12 +6,11 @@
 {% block stylesheets %}
 <!-- Select2 css -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-<!--<link href="/static/assets/css/plugins/datetimepicker.css" rel="stylesheet" type="text/css"/>-->
 <!-- Timepicker css -->
 <link type="text/css" href="/static/assets/css/plugins/bootstrap-timepicker.min.css" />
 <link rel="stylesheet" href="/static/assets/css/plugins/daterangepicker.css">
-<!--<link rel="stylesheet" href="https://appsrv1-147a1.kxcdn.com/gradient-pro/css/plugins/daterangepicker.css">-->
+
+
 {% endblock stylesheets %}
 
 {% block content %}
@@ -44,24 +43,25 @@
                           <form id="myform">
                           {% csrf_token %}
   													<div class="tab-content">
+                              <!--<p class="error" id="error"></p>-->
                               <div class="tab-pane show active" id="progress-t-tab1">
                                 <div class="form-group row">
 																	<label for="progress-t-name" class="col-sm-4 col-form-label">Name</label>
 																	<div class="col-sm-8">
-																		<input name="name" type="text" class="form-control" id="progress-t-name">
+																		<input required name="name" type="text" class="form-control" id="progress-t-name">
 																	</div>
 																</div>
 																<div class="form-group row">
 																	<label for="progress-t-question" class="col-sm-4 col-form-label">Question</label>
 																	<div class="col-sm-8">
-																		<input name="question" type="email" class="form-control" id="progress-t-question">
+																		<input required name="question" type="text" class="form-control" id="progress-t-question">
 																	</div>
 																</div>
                                 <div class="form-group row">
 																	<label for="progress-t-time" class="col-sm-4 col-form-label">Starting Time</label>
 																	<div class="col-sm-8">
                                     <div class="input-group bootstrap-timepicker timepicker">
-                                      <input id="timepicker1" type="text" class="form-control input-small" name="time">
+                                      <input required id="timepicker1" type="text" class="form-control input-small" name="time">
                                       <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
                                     </div>
 																	</div>
@@ -69,7 +69,7 @@
                                 <div class="form-group row">
 																	<label for="progress-t-time" class="col-sm-4 col-form-label">Date Range</label>
 																	<div class="col-sm-8">
-                                    <input type="text" name="daterange" id="daterange" class="form-control">
+                                    <input required type="text" name="daterange" id="daterange" class="form-control">
 																	</div>
 																</div>
                                 <div class="form-group row">
@@ -87,7 +87,7 @@
 																<div class="form-group row">
 																	<label for="progress-t-address" class="col-sm-3 col-form-label">User Group</label>
 																	<div class="col-sm-9">
-              											<select style="width: 100%" id="group-select" name="group-select"></select>
+              											<select style="width: 100%" id="groupselect" name="groupselect"></select>
 																	</div>
 																</div>
   														</div>
@@ -237,6 +237,9 @@
     <!-- Select2 js -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+
+
+
     <!-- cookie js (necessary for CSRF token in ajax post requests) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha512-Meww2sXqNHxI1+5Dyh/9KAtvI9RZSA4c1K2k5iL02oiPO/RH3Q30L3M1albtqMg50u4gRTYdV4EXOQqXEI336A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -251,14 +254,16 @@
     <script src="/static/assets/js/plugins/daterangepicker.js"></script>
     <script src="/static/assets/js/pages/ac-datepicker.js"></script>
 
-<!--<script src="https://appsrv1-147a1.kxcdn.com/gradient-pro/js/pages/form-advance-custom.js"></script>-->
+    <!-- validation -->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
+
 		<script>
 	    $(document).ready(function() {
         $('#timepicker1').timepicker();
 
-
         // [ Select Group Dropdown ] start
-        $('#group-select').select2({
+        $('#groupselect').select2({
           dropdownParent: $('#exampleModalLong'),
           ajax: {
             url: "{% url 'all_groups' %}",
@@ -392,6 +397,10 @@
 
         // [ CREATE/EDIT SURVEY ] start
 				$('#survey-edit-create-button').click(function(){
+          if(!$("form#myform").valid()){
+            //$('form .error').text("Form invalid, all fields are required")
+            return
+          }
           $("#exampleModalLong").modal('hide');
 
           name = $("form#myform input[name='name']").val()
@@ -399,7 +408,7 @@
           time = $("form#myform input[name='time']").val()
           daterange = $("form#myform input[name='daterange']").val()
           frequency = $('#frequency-select').find(':selected').text()
-          group = $('#group-select').find(':selected').text()
+          group = $('#groupselect').find(':selected').text()
 
           const convertTime12to24 = (time12h) => {
             const [time, modifier] = time12h.split(' ');

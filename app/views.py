@@ -55,7 +55,7 @@ def delete_user(request):
             json.dumps(response_data),
             content_type="application/json"
         )
-
+    update_tasks()
     return HttpResponseRedirect(reverse("home"))
 
 def all_users(request):
@@ -97,7 +97,7 @@ def edit_user(request):
             g = Group(group_name=group_name)
             g.save()
             g.users.add(u)
-
+    update_tasks()
     return HttpResponse('Successfully edited question ' + name)
 
 def user_details(request):
@@ -138,7 +138,7 @@ def new_user(request):
                 g = Group(group_name=group_name)
                 g.save()
                 g.users.add(u)
-
+        update_tasks()
         return HttpResponse('Successfully added user ' + name)
 
     return HttpResponseRedirect(reverse("home"))
@@ -154,24 +154,21 @@ def update_tasks():
     for q in Question.objects.all():
         if q.status == "finished":
             continue
-        week_day = q.start_date.weekday()
+
         hr = q.time.hour
         m = q.time.minute
 
         if q.frequency == 'Daily':
-            #cron_expression = f'{m} {hr} * * *'
             schedule, _ = CrontabSchedule.objects.get_or_create(
                 minute=m, hour=hr, day_of_week="*", day_of_month="*", month_of_year="*",
             )
         elif q.frequency == 'Weekly':
-            #cron_expression = f'{m} {hr} * * {week_day+1}'
             schedule, _ = CrontabSchedule.objects.get_or_create(
-                minute=m, hour=hr, day_of_week="*", day_of_month="*", month_of_year=str(week_day+1),
+                minute=m, hour=hr, day_of_week=str(q.start_date.weekday()+1), day_of_month="*", month_of_year="*",
             )
         elif q.frequency == 'Monthly':
-            #cron_expression = f'{m} {hr} 1-7 * {week_day+1}'
             schedule, _ = CrontabSchedule.objects.get_or_create(
-                minute=m, hour=hr, day_of_week="1-7", day_of_month="*", month_of_year=str(week_day+1),
+                minute=m, hour=hr, day_of_week="*", day_of_month=str(q.start_date.day), month_of_year="*",
             )
 
         phones = []

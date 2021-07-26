@@ -84,13 +84,13 @@
 									<div class="col-md-12">
 										<div class="form-group">
 											<label class="form-label">Name</label>
-											<input type="text" class="form-control" name="name" placeholder="Name">
+											<input required type="text" class="form-control" name="name" placeholder="Name">
 										</div>
 									</div>
 									<div class="col-md-12">
 										<div class="form-group">
 											<label class="form-label">Phone Number</label>
-											<input type="text" class="form-control" data-mask="(000) 000-0000" name="phone-number" placeholder="(999) 999-9999">
+											<input required type="text" class="form-control" data-mask="(000) 000-0000" name="phone-number" placeholder="(999) 999-9999">
 										</div>
 									</div>
 									<div class="col-md-12">
@@ -128,10 +128,13 @@
 	<script src="/static/assets/js/plugins/dataTables.bootstrap4.min.js"></script>
 	<!-- Select2 js -->
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<!-- validation -->
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
 
 	<script>
 		$(document).ready(function() {
-			URL_SCHEDULE = "https://eniacprofessional.azurewebsites.net/api/orchestrators/filler"
+
 			// [ Create User Table ] start
 			var user_table = $('#user-list-table').DataTable( {
 					"ajax": "{% url 'all_users' %}",
@@ -181,6 +184,9 @@
 
 			// [ CREATE/EDIT USER ] start
 			$('#user-edit-create-button').click(function(){
+				if(!$("form#myform").valid()){
+					return
+				}
 				name = $("form#myform input[name='name']").val()
 				phone_number = $("form#myform input[name='phone-number']").val()
 				selection_data = $('#group-select').select2('data'); // Array [2]: 0 {text: "Group1", id: "2", …} 1 {text: "afd", id: "5", …}
@@ -195,7 +201,6 @@
 						user_table.ajax.reload();
 					})
 				}
-				ajaxPostRequest(URL_SCHEDULE, {}, null)
 				$("#CreateUserModal").modal('hide');
 			})
 			// [ CREATE/EDIT USER ] end
@@ -207,7 +212,6 @@
 
 				ajaxPostRequest("{% url 'delete_user' %}", { name: username }, function(json) {
 					user_table.ajax.reload();
-					ajaxPostRequest(URL_SCHEDULE, {}, null)
 				})
 			});
 			// [ DELETE USER ] end
