@@ -14,6 +14,8 @@
 			color: white;
 		}
 	</style>
+	<!-- Bootstrap tour -->
+	<link rel="stylesheet" href="/static/build/bootstrap-tourist.css">
 {% endblock stylesheets %}
 
 {% block content %}
@@ -131,7 +133,15 @@
 	<!-- validation -->
 	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
-
+	<script>
+		var MyGlobal = {
+			home: {% url 'home' %},
+			surveys: {% url 'surveys' %},
+		};
+	</script>
+	<!-- Bootstrap tour -->
+	<script src="/static/build/bootstrap-tourist.js"></script>
+	<script src="/static/assets/js/tour.js"></script>
 	<script>
 		$(document).ready(function() {
 

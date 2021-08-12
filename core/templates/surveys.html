@@ -9,8 +9,8 @@
 <!-- Timepicker css -->
 <link type="text/css" href="/static/assets/css/plugins/bootstrap-timepicker.min.css" />
 <link rel="stylesheet" href="/static/assets/css/plugins/daterangepicker.css">
-
-
+<!-- Bootstrap tour -->
+<link rel="stylesheet" href="/static/build/bootstrap-tourist.css">
 {% endblock stylesheets %}
 
 {% block content %}
@@ -35,7 +35,8 @@
 												<div class="bt-wizard" id="progresswizard">
 													<ul class="nav nav-pills nav-fill mb-3">
 														<li class="nav-item"><a href="#progress-t-tab1" class="nav-link active" data-toggle="tab">Question Info</a></li>
-														<li class="nav-item"><a href="#progress-t-tab2" class="nav-link" data-toggle="tab">Recipients</a></li>
+														<li class="nav-item"><a href="#progress-t-tab2" class="nav-link" data-toggle="tab">Timing</a></li>
+                            <li class="nav-item" ><a href="#progress-t-tab3" class="nav-link" data-toggle="tab">Recipients</a></li>
 													</ul>
 													<div id="bar" class="bt-wizard progress mb-3" style="height:6px">
 														<div class="progress-bar bg-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 33.33333333333333%;"></div>
@@ -57,21 +58,24 @@
 																		<input required name="question" type="text" class="form-control" id="progress-t-question">
 																	</div>
 																</div>
+  														</div>
+
+                              <div class="tab-pane" id="progress-t-tab2">
                                 <div class="form-group row">
-																	<label for="progress-t-time" class="col-sm-4 col-form-label">Starting Time</label>
-																	<div class="col-sm-8">
+                                  <label for="progress-t-time" class="col-sm-4 col-form-label">Time</label>
+                                  <div class="col-sm-8">
                                     <div class="input-group bootstrap-timepicker timepicker">
                                       <input required id="timepicker1" type="text" class="form-control input-small" name="time">
                                       <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
                                     </div>
-																	</div>
-																</div>
+                                  </div>
+                                </div>
                                 <div class="form-group row">
-																	<label for="progress-t-time" class="col-sm-4 col-form-label">Date Range</label>
-																	<div class="col-sm-8">
+                                  <label for="progress-t-time" class="col-sm-4 col-form-label">Date Range</label>
+                                  <div class="col-sm-8">
                                     <input required type="text" name="daterange" id="daterange" class="form-control">
-																	</div>
-																</div>
+                                  </div>
+                                </div>
                                 <div class="form-group row">
                                     <label class="col-sm-4" for="exampleFormControlSelect1">Frequency</label>
                                     <div class="col-sm-8">
@@ -82,20 +86,31 @@
                                       </select>
                                     </div>
                                 </div>
-  														</div>
-  														<div class="tab-pane" id="progress-t-tab2">
-																<div class="form-group row">
-																	<label for="progress-t-address" class="col-sm-3 col-form-label">User Group</label>
-																	<div class="col-sm-9">
-              											<select style="width: 100%" id="groupselect" name="groupselect"></select>
-																	</div>
-																</div>
-  														</div>
+                              </div>
+
+                              <div class="tab-pane" id="progress-t-tab3">
+                                <div class="form-group row" id="theanchor">
+                                  <label for="progress-t-address" class="col-sm-4 col-form-label" data-toggle="tooltip" title="The group of users who will receive this survey. Add users to a user group in the Users tab" style="white-space: nowrap;">User Group <i class="fas fa-question-circle"></i></label>
+                                  <div class="col-sm-8">
+                                    <select style="width: 100%" id="group-select" name="group-select"></select>
+                                  </div>
+                                </div>
+                              </div>
+
 													  </div>
+                            <div class="row justify-content-between btn-page">
+          										<div class="col-sm-6">
+          											<a href="#!" class="btn btn-primary button-previous">Previous</a>
+          										</div>
+          										<div class="col-sm-6 text-md-right">
+          											<a href="#!" class="btn btn-primary button-next">Next</a>
+          										</div>
+          									</div>
                           </form>
 												</div>
 											</div>
 										</div>
+
 									</div>
 								</div>
 								<div class="modal-footer">
@@ -113,7 +128,7 @@
 						<nav class="navbar m-b-30 p-10">
 							<ul class="nav">
 								<li class="nav-item f-text active">
-									<a class="nav-link text-secondary" href="#!">Filter: <span class="sr-only">(current)</span></a>
+									<a class="nav-link text-secondary" href="#!" data-toggle="tooltip" title="Tooltip on top">Filter: <span class="sr-only">(current)</span></a>
 								</li>
 								<li class="nav-item dropdown">
 									<a class="nav-link dropdown-toggle text-secondary" href="#" id="bydate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="far fa-clock"></i> By Date</a>
@@ -214,10 +229,10 @@
               {% endfor %}
 					  </div>
 					  <!-- [ task-board ] end -->
-
 				  </div>
       </div>
     </section>
+
     <!-- [ Main Content ] end -->
 {% endblock content %}
 
@@ -239,7 +254,6 @@
 
 
 
-
     <!-- cookie js (necessary for CSRF token in ajax post requests) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha512-Meww2sXqNHxI1+5Dyh/9KAtvI9RZSA4c1K2k5iL02oiPO/RH3Q30L3M1albtqMg50u4gRTYdV4EXOQqXEI336A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -257,19 +271,39 @@
     <!-- validation -->
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
+    <script>
+  	var MyGlobal = {
+  		home: {% url 'home' %},
+  		surveys: {% url 'surveys' %},
+  	};
+  	</script>
+    <!-- Bootstrap tour -->
+    <script src="/static/build/bootstrap-tourist.js"></script>
+    <script src="/static/assets/js/tour.js"></script>
+
+
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
 
 		<script>
 	    $(document).ready(function() {
+        $('[data-toggle="tooltip"]').tooltip({ container: 'body' })
         $('#timepicker1').timepicker();
 
         // [ Select Group Dropdown ] start
-        $('#groupselect').select2({
+        $('#group-select').select2({
           dropdownParent: $('#exampleModalLong'),
           ajax: {
             url: "{% url 'all_groups' %}",
             dataType: 'json'
-          }
+          },
+          tags: true
         });
+
         // [ Select Group Dropdown ] end
 
         // [ "survey time" html attribute ] start
@@ -408,7 +442,7 @@
           time = $("form#myform input[name='time']").val()
           daterange = $("form#myform input[name='daterange']").val()
           frequency = $('#frequency-select').find(':selected').text()
-          group = $('#groupselect').find(':selected').text()
+          group = $('#group-select').find(':selected').text()
 
           const convertTime12to24 = (time12h) => {
             const [time, modifier] = time12h.split(' ');
@@ -512,8 +546,6 @@
                 });
             },
         });
-
-
     });
 
 		</script>

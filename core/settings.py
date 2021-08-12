@@ -71,15 +71,15 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-            'use_unicode': True
-        },
-        'NAME': 'sql5419561',
-        'USER': 'sql5419561',
-        'PASSWORD': 'KnICY4vBre',
-        'HOST': 'sql5.freemysqlhosting.net',
+        #'OPTIONS': {
+        #    'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        #    'charset': 'utf8mb4',
+        #    'use_unicode': True
+        #},
+        'NAME': 'robosource', #"sql5419561",
+        'USER': "admin",#'sql5419561',
+        'PASSWORD': "eniacadmin",#'Papa1106',
+        'HOST': "eniac-engagement.caoflaqgkxgp.us-east-2.rds.amazonaws.com",#'sql5.freemysqlhosting.net',
     }
 }
 

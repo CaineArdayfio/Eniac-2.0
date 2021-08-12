@@ -294,9 +294,14 @@ def edit_survey(request):
         if q.groups.exists(): # if this question has an associated group, remove that group
             old_g = q.groups.all()[0]
             q.groups.remove(old_g)
-        if group_name is not "": # if they don't enter a group for the question
-            new_g = Group.objects.get(group_name=group_name)
-            q.groups.add(new_g)
+        if group_name is not "": # if they enter a group for the question
+            group = Group.objects.filter(group_name=group_name)
+            if group.exists(): # if a group exists with the specified group name...
+                group[0].users.add(u)
+            else:
+                g = Group(group_name=group_name)
+                g.save()
+                q.groups.add(g)
         update_tasks()
         return HttpResponse('Successfully edited question ' + q_id)
     return HttpResponseRedirect(reverse("home"))
@@ -314,8 +319,18 @@ def new_survey(request):
         q.save()
 
         group_name = request.POST.get('group')
-        g = Group.objects.get(group_name=group_name)
-        q.groups.add(g)
+
+        if group_name is not "": # if they enter a group for the question
+            group = Group.objects.filter(group_name=group_name)
+            if group.exists(): # if a group exists with the specified group name...
+                group[0].users.add(u)
+            else:
+                g = Group(group_name=group_name)
+                g.save()
+                q.groups.add(g)
+
+
+
         update_tasks()
         return HttpResponse('Successfully added question ' + question_name)
     return HttpResponseRedirect(reverse("home"))

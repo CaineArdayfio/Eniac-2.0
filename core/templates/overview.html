@@ -6,9 +6,12 @@
 {% block stylesheets %}
 <!-- Select2 css -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<!-- Bootstrap tour -->
+<link rel="stylesheet" href="/static/build/bootstrap-tourist.css">
 {% endblock stylesheets %}
 
 {% block content %}
+
 
 	<!-- [ Main Content ] start -->
 	<div class="pcoded-main-container">
@@ -126,7 +129,7 @@
 								</div>
 						</div>
 				</div>
-
+				<p id="start-tour">Caine!!</p>
 			</div>
 			<!-- [ Main Content ] end -->
 		</div>
@@ -138,10 +141,12 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 	<script>
-	var MyGlobal = {
-		survey_details: {% url 'survey_details' %},
-		all_questions: {% url 'all_questions' %},
-	};
+		var MyGlobal = {
+			home: {% url 'home' %},
+			surveys: {% url 'surveys' %},
+			survey_details: {% url 'survey_details' %},
+			all_questions: {% url 'all_questions' %},
+		};
 	</script>
 	<!-- cookie js (necessary for CSRF token in ajax post requests) -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha512-Meww2sXqNHxI1+5Dyh/9KAtvI9RZSA4c1K2k5iL02oiPO/RH3Q30L3M1albtqMg50u4gRTYdV4EXOQqXEI336A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -151,24 +156,12 @@
 	<script src="/static/assets/js/plugins/apexcharts.min.js"></script>
 	<!-- Select2 js -->
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+	<!-- Bootstrap tour -->
+	<script src="/static/build/bootstrap-tourist.js"></script>
+	<script src="/static/assets/js/tour.js"></script>
 	<script type="text/javascript">
-		/*
-		$('#group-select').select2({
-			ajax: {
-				url: "{% url 'all_groups' %}",
-				dataType: 'json'
-			}
-		});
-		*/
 		ajaxPostRequest('{% url "all_user_responses" %}', {}, function(json){
 			plot_response_data(json)
 		})
-		/*
-		ajaxPostRequest('{% url "all_user_responses" %}', {}, function(json){
-			plot_user_data(json)
-		})
-		*/
 	</script>
-
 {% endblock javascripts %}
