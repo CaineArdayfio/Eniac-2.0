@@ -346,6 +346,7 @@ def surveys(request):
         "finished_surveys": Question.objects.filter(status='finished').order_by('-creation_date'),
         "all_surveys": Question.objects.all().order_by('-creation_date'),
     }
+    
     context['segment'] = 'index'
 
     html_template = loader.get_template( 'surveys.html' )

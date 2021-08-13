@@ -151,7 +151,7 @@
 
 						<!-- [ task-board ] start -->
 						<div class="row grid">
-              {% for question in surveys.active_surveys %}
+              {% for question in surveys.all_surveys %}
               <div class="col-md-6 col-sm-12 survey-container" data-id="{{ question.id }}" data-status="{{ question.status }}">
   							<div class="card card-border-c-{% cycle 'blue' 'red' 'green' 'yellow'%}">
   								<div class="card-header">
@@ -162,17 +162,28 @@
   									<div class="row">
   										<div class="col-sm-12">
   											<p class="task-detail">{{ question.question_text }}</p>
-  											<p class="task-due">Survey will send at </p>
+                        {% if question.status == "finished" %}
+    											<p>Survey is not active </p>
+                        {% else %}
+                          <p class="task-due">Survey will send at </p>
+                        {% endif %}
   										</div>
   									</div>
   									<hr>
   									<div class="task-list-table">
+                      <!--<button type="button" data-q-id="{{ question.id }}" class="view-results btn btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm mr-1">Send Sample Survey</button>-->
   										{% for group in question.groups.all %}<a href="{% url 'users' %}"><span class="badge badge-light-{% cycle 'primary' 'danger' 'success' 'warning'%}">{{ group }}</span></a>{% endfor %}
   									</div>
   									<div class="task-board">
+                      Survey Active:
                       <div class="switch switch-primary d-inline m-r-10">
-                          <input type="checkbox" id="switch-p-{{ question.id }}" checked="" class="toggle-status">
-                          <label for="switch-p-{{ question.id }}" class="cr"></label>
+                          {% if question.status == "finished" %}
+                            <input type="checkbox" id="switch-p-{{ question.id }}" class="toggle-status">
+                            <label for="switch-p-{{ question.id }}" class="cr"></label>
+                          {% else %}
+                            <input type="checkbox" id="switch-p-{{ question.id }}" checked="" class="toggle-status">
+                            <label for="switch-p-{{ question.id }}" class="cr"></label>
+                          {% endif %}
                       </div>
   										<div class="dropdown-secondary dropdown">
   											<button type="button" data-q-id="{{ question.id }}" class="view-results btn btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm">View Results</button>
@@ -180,46 +191,8 @@
   										<div class="dropdown-secondary dropdown">
   											<button class="btn waves-effect waves-light btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm dropdown-toggle b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-bars"></i></button>
   											<div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-
-  												<a class="dropdown-item survey-edit-button" href="#!">Edit</a>
+                          <a class="dropdown-item survey-edit-button" href="#!">Edit</a>
   												<a class="dropdown-item question_remove" data-q-id="{{ question.id }}" href="#!">Delete Survey</a>
-  											</div>
-  										</div>
-  									</div>
-  								</div>
-  							</div>
-  						</div>
-              {% endfor %}
-              {% for question in surveys.finished_surveys %}
-              <div class="col-md-6 col-sm-12 survey-container" data-id="{{ question.id }}">
-  							<div class="card card-border-c-{% cycle 'blue' 'red' 'green' 'yellow'%}">
-  								<div class="card-header">
-                      <a href="#!" class="text-secondary question_name"><strong>{{ question.question_name }} </strong></a>
-    									<span class="label label-primary float-right creation_date"> Created {{ question.creation_date.date }} </span>
-  								</div>
-  								<div class="card-body card-task">
-  									<div class="row">
-  										<div class="col-sm-12">
-  											<p class="task-detail">{{ question.question_text }}</p>
-  											<p>This survey has ended</p>
-  										</div>
-  									</div>
-  									<hr>
-  									<div class="task-list-table">
-  										{% for group in question.groups.all %}<a href="{% url 'users' %}"><span class="badge badge-light-{% cycle 'primary' 'danger' 'success' 'warning'%}">{{ group }}</span></a>{% endfor %}
-  									</div>
-  									<div class="task-board">
-                      <div class="switch switch-primary d-inline m-r-10">
-                          <input type="checkbox" id="switch-p-{{ question.id }}" class="toggle-status">
-                          <label for="switch-p-{{ question.id }}" class="cr"></label>
-                      </div>
-  										<div class="dropdown-secondary dropdown">
-  											<button type="button" data-q-id="{{ question.id }}" class="view-results btn btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm">View Results</button>
-  										</div>
-                      <div class="dropdown-secondary dropdown">
-  											<button class="btn waves-effect waves-light btn-{% cycle 'primary' 'danger' 'success' 'warning'%} btn-sm dropdown-toggle b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-bars"></i></button>
-  											<div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-  												<a class="dropdown-item question_remove" data-q-id="{{ question.id }}" href="#!">Delete</a>
   											</div>
   										</div>
   									</div>
@@ -393,17 +366,19 @@
         })
         // [ TIME SINCE PUBLICATION FILTER ] end
 
-        // [ FINISH SURVEY ] start
+        // [ TOGGLE SURVEY ] start
         $('.toggle-status:checkbox').change(function() {
             var parent_div = $(this).closest('.survey-container')
             var q_id = parent_div.attr('data-id');
+            parent_div.children(".inactive_s").fadeIn();
+            console.log(parent_div.closest(".inactive_s"));
             if (this.checked) { // the checkbox is now checked
                 ajaxPostRequest("{% url 'finish_survey' %}", { id: q_id, status: "active"}, null)
             } else { // the checkbox is now no longer checked
                 ajaxPostRequest("{% url 'finish_survey' %}", { id: q_id, status: "finished" }, null)
             }
         });
-        // [ FINISH SURVEY ] end
+        // [ TOGGLE SURVEY ] end
 
         // [ VIEW RESULTS ] start
         $(".view-results").click(function(){
