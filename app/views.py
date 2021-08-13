@@ -297,7 +297,7 @@ def edit_survey(request):
         if group_name is not "": # if they enter a group for the question
             group = Group.objects.filter(group_name=group_name)
             if group.exists(): # if a group exists with the specified group name...
-                group[0].users.add(u)
+                q.groups.add(group[0])
             else:
                 g = Group(group_name=group_name)
                 g.save()
@@ -323,7 +323,7 @@ def new_survey(request):
         if group_name is not "": # if they enter a group for the question
             group = Group.objects.filter(group_name=group_name)
             if group.exists(): # if a group exists with the specified group name...
-                group[0].users.add(u)
+                q.groups.add(group[0])
             else:
                 g = Group(group_name=group_name)
                 g.save()
