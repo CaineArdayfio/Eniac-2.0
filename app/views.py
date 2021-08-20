@@ -178,7 +178,7 @@ def update_tasks():
                 phones.append(''.join(e for e in user.phone_number if e.isalnum())) # add that users phone number
 
         PeriodicTask.objects.update_or_create(
-            name=q.question_name,
+            name=q.question_name + str(q.id),
             task='app.celery.send_sms',
             start_time=q.start_date, # set to start sending out text messages 12:00am of this day #datetime.combine(q.start_date, q.time),
             args=json.dumps([q.id, q.question_name, q.question_text, phones]),
@@ -294,7 +294,7 @@ def edit_survey(request):
         if q.groups.exists(): # if this question has an associated group, remove that group
             old_g = q.groups.all()[0]
             q.groups.remove(old_g)
-        if group_name is not "": # if they enter a group for the question
+        if group_name != "": # if they enter a group for the question
             group = Group.objects.filter(group_name=group_name)
             if group.exists(): # if a group exists with the specified group name...
                 q.groups.add(group[0])
@@ -320,7 +320,7 @@ def new_survey(request):
 
         group_name = request.POST.get('group')
 
-        if group_name is not "": # if they enter a group for the question
+        if group_name != "": # if they enter a group for the question
             group = Group.objects.filter(group_name=group_name)
             if group.exists(): # if a group exists with the specified group name...
                 q.groups.add(group[0])
@@ -346,7 +346,7 @@ def surveys(request):
         "finished_surveys": Question.objects.filter(status='finished').order_by('-creation_date'),
         "all_surveys": Question.objects.all().order_by('-creation_date'),
     }
-    
+
     context['segment'] = 'index'
 
     html_template = loader.get_template( 'surveys.html' )
@@ -407,7 +407,7 @@ def overview(request):
 
     active_questions = Question.objects.filter(status="active")
     total_questions = Question.objects.all()
-    percent_active = round(len(active_questions)/len(total_questions)*100) if len(total_questions) is not 0 else 0
+    percent_active = round(len(active_questions)/len(total_questions)*100) if len(total_questions) != 0 else 0
     months_questions = Question.objects.filter(pk__in=questions_this_month)
     last_months_questions = Question.objects.filter(pk__in=questions_last_month)
 
@@ -428,11 +428,11 @@ def overview(request):
     distinct_responses_last_month = last_months_responses.values('question_id').distinct() # how many questions had at least one response last month
     distinct_responses_total = total_responses.values('question_id').distinct() # how many questions have at least one response
 
-    percent_responses_this_month = round(len(months_responses)/len(total_responses)*100) if len(total_responses) is not 0 else 0
+    percent_responses_this_month = round(len(months_responses)/len(total_responses)*100) if len(total_responses) != 0 else 0
 
     total_users = User.objects.all()
     active_users = UserResponse.objects.values('user_id').distinct()
-    percent_users_active = round(len(active_users)/len(total_users)*100) if len(total_users) is not 0 else 0
+    percent_users_active = round(len(active_users)/len(total_users)*100) if len(total_users) != 0 else 0
     if len(total_questions) >= 1:
         percentResponseTotal = round(len(distinct_responses_total)/len(total_questions)*100)  # the percent of uqerstions with at least one response
     else:
